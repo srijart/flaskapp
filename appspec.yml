@@ -1,0 +1,37 @@
+version: 0.0
+os: linux
+
+phases:
+  install:
+    commands:
+      - echo Install phase for Flask
+
+  pre_build:
+    commands:
+      - echo Pre-build phase for Flask
+
+  build:
+    commands:
+      - echo Build phase for Flask
+
+  post_build:
+    commands:
+      - echo Post-build phase for Flask
+
+  deploy:
+    application_start:
+      commands:
+        - echo Starting Flask application
+        - $(aws ecr get-login --no-include-email --region $AWS_REGION)
+        - docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/flaskapp:latest
+        - docker run -d -p 5000:5000 $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/flaskapp:latest
+
+    validate_service:
+      commands:
+        - echo Validating deployment...
+        - curl -f http://localhost:5000 || exit 1
+
+    teardown:
+      commands:
+        - echo Application deployment completed successfully!
+
